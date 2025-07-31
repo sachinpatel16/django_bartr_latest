@@ -1,15 +1,29 @@
 import environ
-
+import os
 import firebase_admin # type: ignore
 from firebase_admin import credentials, auth # type: ignore
 from corsheaders.defaults import default_headers # type: ignore
 
+from pathlib import Path
 from datetime import timedelta
 
 env = environ.Env()
-environ.Env.read_env()
 
+# Project root: 3 levels above this settings file
 root = environ.Path(__file__) - 3
+BASE_DIR = root()
+
+# Try loading .env from BASE_DIR first
+base_env_path = os.path.join(BASE_DIR, ".env")
+fallback_env_path = os.path.join(BASE_DIR, "config", "settings", ".env")
+
+if os.path.exists(base_env_path):
+    env.read_env(base_env_path)
+elif os.path.exists(fallback_env_path):
+    env.read_env(fallback_env_path)
+else:
+    print("⚠️  No .env file found in BASE_DIR or config/settings/.env")
+
 apps_root = root.path('freelancing')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
